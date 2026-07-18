@@ -1,14 +1,20 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mockDeep, mockReset } from "vitest-mock-extended";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { mockDeep, mockReset, type DeepMockProxy } from "vitest-mock-extended";
 import type { PrismaClient } from "@prisma/client";
 
-const prismaMock = mockDeep<PrismaClient>();
-const authMock = vi.fn();
+vi.mock("@/lib/prisma", async () => {
+  const { mockDeep } = await import("vitest-mock-extended");
+  return { prisma: mockDeep() };
+});
+vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 
-vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
-vi.mock("@/lib/auth", () => ({ auth: () => authMock() }));
-
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import { PATCH } from "@/app/api/user/route";
+
+const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
+const authMock = auth as unknown as Mock;
+void mockDeep; // keep type-only import anchored
 
 function patchReq(body: unknown) {
   return new Request("http://localhost/api/user", {
