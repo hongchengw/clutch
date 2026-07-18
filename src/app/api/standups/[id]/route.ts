@@ -26,10 +26,27 @@ export async function GET(_req: Request, ctx: RouteContext) {
   return NextResponse.json(toStandupDTO(doc));
 }
 
+// Audit F2: bound edit sizes and enforce the StandupContent shape so
+// arbitrary blobs can't be persisted through user edits.
+const bulletSchema = z.object({
+  text: z.string().max(2_000),
+  eventIds: z.array(z.string().max(200)).max(100),
+  url: z.string().max(2_000).nullable(),
+});
+
+const contentJsonSchema = z.object({
+  didYesterday: z.array(bulletSchema).max(200),
+  doingNext: z.array(bulletSchema).max(200),
+  blockers: z.array(bulletSchema).max(200),
+  proofLinks: z
+    .array(z.object({ label: z.string().max(500), url: z.string().max(2_000) }))
+    .max(200),
+});
+
 const patchSchema = z
   .object({
-    contentMd: z.string().min(1).optional(),
-    contentJson: z.unknown().optional(),
+    contentMd: z.string().min(1).max(200_000).optional(),
+    contentJson: contentJsonSchema.optional(),
   })
   .refine(
     (data) => data.contentMd !== undefined || data.contentJson !== undefined,

@@ -118,6 +118,7 @@ export function createGitHubClient(
     },
 
     async listCommits(owner, repo, opts = {}) {
+      const [o, r] = [encodeURIComponent(owner), encodeURIComponent(repo)];
       type RawCommit = {
         sha: string;
         html_url: string;
@@ -128,9 +129,7 @@ export function createGitHubClient(
         author: { login: string } | null;
       };
       const since = opts.since ? `?since=${encodeURIComponent(opts.since)}` : "";
-      const raw = await paginate<RawCommit>(
-        `/repos/${owner}/${repo}/commits${since}`
-      );
+      const raw = await paginate<RawCommit>(`/repos/${o}/${r}/commits${since}`);
       return raw.map((c) => ({
         sha: c.sha,
         message: c.commit.message,
@@ -158,7 +157,7 @@ export function createGitHubClient(
         changed_files?: number;
       };
       const raw = await paginate<RawPull>(
-        `/repos/${owner}/${repo}/pulls?state=all&sort=updated&direction=desc`
+        `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls?state=all&sort=updated&direction=desc`
       );
       return raw.map((p) => ({
         number: p.number,
@@ -191,7 +190,7 @@ export function createGitHubClient(
       const reviews: GitHubReview[] = [];
       for (const pr of pulls) {
         const raw = await paginate<RawReview>(
-          `/repos/${owner}/${repo}/pulls/${pr.number}/reviews`
+          `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${pr.number}/reviews`
         );
         for (const r of raw) {
           if (!r.user || !r.submitted_at) continue;

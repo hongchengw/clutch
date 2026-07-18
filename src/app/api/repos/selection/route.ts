@@ -3,14 +3,23 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// GitHub owner/repo segment: word chars, dots, dashes only — blocks
+// path traversal ("..", ".") and injection into API URLs (audit F1).
+const ghSegment = z
+  .string()
+  .min(1)
+  .max(100)
+  .regex(/^[A-Za-z0-9_.-]+$/)
+  .refine((s) => !/^\.+$/.test(s), { message: "Invalid repo segment" });
+
 const selectionSchema = z.object({
   repos: z
     .array(
       z.object({
         githubRepoId: z.string().min(1),
-        owner: z.string().min(1),
-        name: z.string().min(1),
-        fullName: z.string().min(1),
+        owner: ghSegment,
+        name: ghSegment,
+        fullName: z.string().min(1).max(201),
         private: z.boolean(),
         included: z.boolean(),
       })
