@@ -4,19 +4,18 @@ import { useEffect, useState } from "react";
 import { StandupGenerator } from "@/components/StandupGenerator";
 import { demoIntern } from "@/data/demo";
 import { fetchActivity } from "@/lib/api";
-import { resolveDateRange } from "@/lib/ranges";
-import type { ActivityEvent } from "@/lib/types";
+import { resolveUiRange } from "@/lib/ui-helpers";
+import type { ActivityEventDTO } from "@/lib/types";
 
 export default function StandupsPage() {
-  const [events, setEvents] = useState<ActivityEvent[]>(demoIntern.events);
+  const [events, setEvents] = useState<ActivityEventDTO[]>(demoIntern.events);
   const [demo, setDemo] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      const intern = resolveDateRange("internship", {
+      const intern = resolveUiRange("internship", {
         internshipStart: demoIntern.internshipStartDate,
-        internshipEnd: demoIntern.internshipEndDate,
       });
       const apiEvents = await fetchActivity(
         intern.start.toISOString(),
@@ -40,7 +39,7 @@ export default function StandupsPage() {
       <p className="mt-2 text-sm text-[var(--mist)]">
         Generate for yesterday or full internship. Edits always win over AI.
         {demo
-          ? " Using local/template generation until Person A’s persistence API is ready."
+          ? " Using local template generation until authenticated APIs return data."
           : " Wired to live activity data."}
       </p>
       <div className="mt-6">
@@ -48,7 +47,6 @@ export default function StandupsPage() {
           events={events}
           demo={demo}
           internshipStart={demoIntern.internshipStartDate}
-          internshipEnd={demoIntern.internshipEndDate}
         />
       </div>
     </div>

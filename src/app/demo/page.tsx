@@ -12,7 +12,6 @@ export default function DemoPage() {
         demo
         events={demoIntern.events}
         internshipStart={demoIntern.internshipStartDate}
-        internshipEnd={demoIntern.internshipEndDate}
       />
     </main>
   );

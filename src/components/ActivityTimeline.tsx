@@ -1,6 +1,6 @@
-import type { ActivityEvent } from "@/lib/types";
+import type { ActivityEventDTO, ActivityEventType } from "@/lib/types";
 
-const typeLabel: Record<ActivityEvent["type"], string> = {
+const typeLabel: Record<ActivityEventType, string> = {
   commit: "Commit",
   pr_opened: "PR opened",
   pr_merged: "PR merged",
@@ -11,7 +11,7 @@ const typeLabel: Record<ActivityEvent["type"], string> = {
   comment: "Comment",
 };
 
-export function ActivityTimeline({ events }: { events: ActivityEvent[] }) {
+export function ActivityTimeline({ events }: { events: ActivityEventDTO[] }) {
   if (events.length === 0) {
     return (
       <div className="panel rounded-2xl p-5 text-sm text-[var(--mist)]">
@@ -23,11 +23,13 @@ export function ActivityTimeline({ events }: { events: ActivityEvent[] }) {
   return (
     <ol className="panel divide-y divide-[var(--line)] rounded-2xl">
       {events.slice(0, 20).map((event) => (
-        <li key={event.id} className="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <li
+          key={event.id}
+          className="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+        >
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--mist)]">
-              {typeLabel[event.type]}
-              {event.repoFullName ? ` · ${event.repoFullName}` : ""}
+              {typeLabel[event.type]} · {event.repoFullName}
             </p>
             <a
               href={event.url}

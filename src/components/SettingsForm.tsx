@@ -1,15 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  fetchRepos,
-  saveRepoSelection,
-  triggerSync,
-} from "@/lib/api";
-import type { RepoListItem } from "@/lib/types";
+import { fetchRepos, saveRepoSelection, triggerSync } from "@/lib/api";
+import type { RepoDTO } from "@/lib/types";
 
 export function SettingsForm() {
-  const [repos, setRepos] = useState<RepoListItem[]>([]);
+  const [repos, setRepos] = useState<RepoDTO[]>([]);
   const [startDate, setStartDate] = useState("2026-05-26");
   const [endDate, setEndDate] = useState("2026-08-14");
   const [status, setStatus] = useState<string | null>(null);
@@ -35,7 +31,7 @@ export function SettingsForm() {
       } else {
         setApiReady(false);
         setStatus(
-          "Repo API not available yet (Person A). Form is ready and will work when /api/repos lands.",
+          "Repo API not available yet (sign in + Person A /api/repos). Form stays ready.",
         );
       }
     }
@@ -55,12 +51,12 @@ export function SettingsForm() {
 
   async function onSave() {
     setSaving(true);
-    const included = repos.filter((r) => r.included).map((r) => r.fullName);
-    const ok = await saveRepoSelection(included);
+    const ok = await saveRepoSelection(repos);
+    const included = repos.filter((r) => r.included).length;
     setStatus(
       ok
-        ? `Saved ${included.length} included repos.`
-        : "Could not save — /api/repos/selection not ready yet.",
+        ? `Saved ${included} included repos.`
+        : "Could not save — sign in or wait for /api/repos/selection.",
     );
     setSaving(false);
   }
@@ -69,10 +65,10 @@ export function SettingsForm() {
     setSaving(true);
     const res = await triggerSync();
     if (res) {
-      setLastSyncedAt(res.lastSyncedAt ?? new Date().toISOString());
-      setStatus("Sync triggered.");
+      setLastSyncedAt(res.syncedAt);
+      setStatus(`Sync finished for ${res.repos.length} repos.`);
     } else {
-      setStatus("Could not sync — /api/sync not ready yet.");
+      setStatus("Could not sync — sign in or wait for /api/sync.");
     }
     setSaving(false);
   }
@@ -107,10 +103,6 @@ export function SettingsForm() {
             />
           </label>
         </div>
-        <p className="mt-2 text-xs text-[var(--mist)]">
-          Persisting dates via user settings API can land with Person A; values
-          are used client-side for range pickers today.
-        </p>
       </section>
 
       <section className="panel rounded-2xl p-5">
@@ -120,7 +112,7 @@ export function SettingsForm() {
             <p className="text-sm text-[var(--mist)]">
               {apiReady
                 ? "Toggle which repos ShipLog should include."
-                : "Waiting on GET /api/repos"}
+                : "Waiting on GET /api/repos (after GitHub login)"}
             </p>
           </div>
           <button

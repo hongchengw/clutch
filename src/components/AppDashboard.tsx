@@ -4,24 +4,19 @@ import { useEffect, useState } from "react";
 import { DashboardView } from "@/components/DashboardView";
 import { demoIntern } from "@/data/demo";
 import { fetchActivity } from "@/lib/api";
-import { resolveDateRange } from "@/lib/ranges";
-import type { ActivityEvent } from "@/lib/types";
+import { resolveUiRange } from "@/lib/ui-helpers";
+import type { ActivityEventDTO } from "@/lib/types";
 
-/**
- * Real /app dashboard: prefers Person A's /api/activity.
- * Falls back to labeled demo data so the UI never crashes if APIs aren't merged yet.
- */
 export function AppDashboard() {
-  const [events, setEvents] = useState<ActivityEvent[] | null>(null);
+  const [events, setEvents] = useState<ActivityEventDTO[] | null>(null);
   const [source, setSource] = useState<"api" | "fallback">("fallback");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      const intern = resolveDateRange("internship", {
+      const intern = resolveUiRange("internship", {
         internshipStart: demoIntern.internshipStartDate,
-        internshipEnd: demoIntern.internshipEndDate,
       });
       const apiEvents = await fetchActivity(
         intern.start.toISOString(),
@@ -55,16 +50,13 @@ export function AppDashboard() {
     <>
       {source === "fallback" && (
         <div className="border-b border-[var(--line)] bg-[rgba(46,230,166,0.08)] px-4 py-2 text-center text-sm text-[var(--mist)]">
-          Live activity API not available yet — showing seed data so UI work can
-          continue. Will auto-switch when Person A&apos;s{" "}
-          <code className="font-mono text-[var(--signal)]">/api/activity</code>{" "}
-          lands.
+          Live activity API not available yet — showing seed data. Auto-switches
+          when authenticated sync data is present.
         </div>
       )}
       <DashboardView
         events={events}
         internshipStart={demoIntern.internshipStartDate}
-        internshipEnd={demoIntern.internshipEndDate}
         demo={source === "fallback"}
       />
     </>

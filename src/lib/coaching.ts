@@ -1,4 +1,4 @@
-import type { ActivityEvent, MetricsSummary } from "@/lib/types";
+import type { ActivityEventDTO, MetricsDTO } from "@/lib/types";
 
 export interface CoachingCard {
   id: string;
@@ -8,12 +8,15 @@ export interface CoachingCard {
 
 /** Friendly coaching heuristics from SPEC §7.8 (not scores). */
 export function buildCoachingCards(
-  events: ActivityEvent[],
-  metrics: MetricsSummary,
+  events: ActivityEventDTO[],
+  metrics: MetricsDTO,
 ): CoachingCard[] {
   const cards: CoachingCard[] = [];
 
-  if (metrics.reviews < 3 && metrics.prsMerged + metrics.prsOpened >= 2) {
+  if (
+    metrics.reviewsGiven < 3 &&
+    metrics.prsMerged + metrics.prsOpened >= 2
+  ) {
     cards.push({
       id: "few-reviews",
       title: "Review a teammate this week",
@@ -48,13 +51,13 @@ export function buildCoachingCards(
   }
 
   const drafts = events.filter((e) => e.type === "pr_opened");
-  const mergedIds = new Set(
+  const mergedTitles = new Set(
     events
       .filter((e) => e.type === "pr_merged")
       .map((e) => e.title.toLowerCase().slice(0, 24)),
   );
   const staleDrafts = drafts.filter(
-    (d) => !mergedIds.has(d.title.toLowerCase().slice(0, 24)),
+    (d) => !mergedTitles.has(d.title.toLowerCase().slice(0, 24)),
   );
   if (staleDrafts.length >= 1) {
     cards.push({

@@ -1,9 +1,8 @@
-/**
- * Shared API / UI contracts for ShipLog MVP.
- * Person A (platform) and Person B (UI) both import from here — keep shapes stable.
- */
+// Shared contract types between Person A's APIs and Person B's UI.
+// Keep these stable — the dashboard, standup generator, and demo seed
+// data all depend on them (TASK.md integration checkpoints).
 
-export type ActivityType =
+export type ActivityEventType =
   | "commit"
   | "pr_opened"
   | "pr_merged"
@@ -13,114 +12,91 @@ export type ActivityType =
   | "issue_closed"
   | "comment";
 
-export type Provider = "github" | "gitlab";
+export interface ActivityEventDTO {
+  id: string;
+  repoId: string;
+  repoFullName: string;
+  provider: "github" | "gitlab";
+  externalId: string;
+  type: ActivityEventType;
+  title: string;
+  summary: string | null;
+  url: string;
+  additions: number | null;
+  deletions: number | null;
+  filesChanged: number | null;
+  occurredAt: string; // ISO 8601
+}
 
-export type StandupTone = "casual" | "professional" | "resume";
-export type StandupLength = "short" | "standard" | "detailed";
+export interface MetricsDTO {
+  rangeStart: string;
+  rangeEnd: string;
+  prsOpened: number;
+  prsMerged: number;
+  reviewsGiven: number;
+  commits: number;
+  activeRepos: number;
+  /** Days with ≥1 event / working days (Mon–Fri) in range, 0..1 */
+  consistency: number;
+}
 
-export type DateRangeKey =
+export type StandupRangePreset =
   | "yesterday"
   | "last7"
   | "last30"
   | "custom"
   | "internship";
 
-export interface ActivityEvent {
-  id: string;
-  userId: string;
-  repoId?: string | null;
-  provider: Provider;
-  externalId: string;
-  type: ActivityType;
-  title: string;
-  summary?: string | null;
-  url: string;
-  additions?: number | null;
-  deletions?: number | null;
-  filesChanged?: number | null;
-  occurredAt: string; // ISO
-  repoFullName?: string;
-}
+export type StandupTone = "casual" | "professional" | "resume";
+export type StandupLength = "short" | "standard" | "detailed";
 
-export interface MetricsSummary {
-  prsOpened: number;
-  prsMerged: number;
-  reviews: number;
-  commits: number;
-  reposActive: number;
-  additions: number;
-  deletions: number;
-  consistency: number; // 0–1 working-day ratio
-  streak: number; // consecutive days with ≥1 event ending at rangeEnd
-}
-
-export interface RepoListItem {
-  id?: string;
-  owner: string;
-  name: string;
-  fullName: string;
-  private: boolean;
-  included: boolean;
-  lastSyncedAt?: string | null;
-  githubRepoId?: string | null;
-}
-
-export interface StandupSection {
-  title: string;
-  bullets: StandupBullet[];
-}
-
-export interface StandupBullet {
+export interface StandupSectionBullet {
   text: string;
-  eventId?: string;
-  url?: string;
+  /** ActivityEvent ids backing this bullet — every claim needs a receipt */
+  eventIds: string[];
+  /** Direct link to the PR/commit/review as proof */
+  url: string | null;
 }
 
 export interface StandupContent {
-  whatIDid: StandupBullet[];
-  whatsNext: StandupBullet[];
-  blockers: StandupBullet[];
-  proofLinks: StandupBullet[];
+  didYesterday: StandupSectionBullet[];
+  doingNext: StandupSectionBullet[];
+  blockers: StandupSectionBullet[];
+  proofLinks: { label: string; url: string }[];
 }
 
-export interface StandupDoc {
+export interface StandupDocDTO {
   id: string;
-  userId: string;
   rangeStart: string;
   rangeEnd: string;
   tone: StandupTone;
   length: StandupLength;
   contentMd: string;
-  contentJson: StandupContent;
+  contentJson: StandupContent | null;
   eventIds: string[];
   createdAt: string;
   updatedAt: string;
 }
 
-export interface GenerateStandupRequest {
-  rangeStart: string;
-  rangeEnd: string;
-  tone: StandupTone;
-  length: StandupLength;
-  highlightMode?: boolean;
-  /** When true (demo), generator runs client-side / local — no DB persistence. */
-  demo?: boolean;
-  events?: ActivityEvent[];
-}
-
-export interface GenerateStandupResponse {
-  id?: string;
-  contentMd: string;
-  contentJson: StandupContent;
-  eventIds: string[];
-}
-
-export interface DemoIntern {
-  id: string;
+export interface RepoDTO {
+  githubRepoId: string;
+  owner: string;
   name: string;
-  githubUsername: string;
-  internshipStartDate: string;
-  internshipEndDate: string;
-  repos: RepoListItem[];
-  events: ActivityEvent[];
+  fullName: string;
+  private: boolean;
+  included: boolean;
+  lastSyncedAt: string | null;
+}
+
+export interface SyncRepoResult {
+  fullName: string;
+  status: "synced" | "error";
+  newEvents: number;
+  lastSyncedAt: string | null;
+  error?: string;
+}
+
+export interface SyncResponse {
+  repos: SyncRepoResult[];
+  syncedAt: string;
 }

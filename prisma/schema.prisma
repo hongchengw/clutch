@@ -1,13 +1,10 @@
-// ShipLog MVP schema — SPEC §11
-// Person A owns auth/sync wiring; Person B consumes ActivityEvent / StandupDoc shapes via src/lib/types.ts
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// DATABASE_URL is configured in prisma.config.ts (Prisma 7+)
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -43,15 +40,13 @@ model User {
   internshipStartDate DateTime?
   internshipEndDate   DateTime?
   createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
 
-  accounts        Account[]
-  sessions        Session[]
-  repoSelections  RepoSelection[]
-  activityEvents  ActivityEvent[]
-  standupDocs     StandupDoc[]
-  managerInvites  ManagerInvite[]
-  metricSnapshots MetricSnapshot[]
+  accounts       Account[]
+  sessions       Session[]
+  repoSelections RepoSelection[]
+  activityEvents ActivityEvent[]
+  standupDocs    StandupDoc[]
+  managerInvites ManagerInvite[]
 }
 
 model Account {
@@ -60,12 +55,13 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  // OAuth access token, AES-256-GCM encrypted at rest (src/lib/crypto.ts)
+  access_token      String?
+  refresh_token     String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -78,42 +74,32 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model RepoSelection {
-  id            String    @id @default(cuid())
-  userId        String
-  provider      Provider  @default(github)
-  owner         String
-  name          String
-  fullName      String
-  githubRepoId  String?
-  private       Boolean   @default(false)
-  included      Boolean   @default(true)
-  lastSyncedAt  DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  userId       String
+  provider     Provider  @default(github)
+  owner        String
+  name         String
+  fullName     String
+  githubRepoId String
+  private      Boolean   @default(false)
+  included     Boolean   @default(false)
+  lastSyncedAt DateTime?
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   activityEvents ActivityEvent[]
 
-  @@unique([userId, provider, fullName])
-  @@index([userId, included])
+  @@unique([userId, provider, githubRepoId])
 }
 
 model ActivityEvent {
   id           String       @id @default(cuid())
   userId       String
-  repoId       String?
+  repoId       String
   provider     Provider     @default(github)
   externalId   String
   type         ActivityType
@@ -125,28 +111,26 @@ model ActivityEvent {
   filesChanged Int?
   occurredAt   DateTime
   rawJson      Json?
-  createdAt    DateTime     @default(now())
 
-  user User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  repo RepoSelection? @relation(fields: [repoId], references: [id], onDelete: SetNull)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repo RepoSelection @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, provider, externalId])
+  @@unique([provider, externalId])
   @@index([userId, occurredAt])
-  @@index([userId, type])
 }
 
 model StandupDoc {
-  id         String   @id @default(cuid())
-  userId     String
-  rangeStart DateTime
-  rangeEnd   DateTime
-  tone       String
-  length     String
-  contentMd  String   @db.Text
+  id          String   @id @default(cuid())
+  userId      String
+  rangeStart  DateTime
+  rangeEnd    DateTime
+  tone        String
+  length      String
+  contentMd   String
   contentJson Json?
-  eventIds   String[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  eventIds    String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -154,14 +138,16 @@ model StandupDoc {
 }
 
 model ManagerInvite {
-  id         String    @id @default(cuid())
-  userId     String
-  token      String    @unique
-  email      String?
-  expiresAt  DateTime?
-  revokedAt  DateTime?
-  permissions Json?
-  createdAt  DateTime  @default(now())
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  email     String?
+  expiresAt DateTime?
+  revokedAt DateTime?
+  // permissions: which repos + earliest date the manager may see
+  repoScope String[]
+  dateFloor DateTime?
+  createdAt DateTime  @default(now())
 
   user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   notes ManagerNote[]
@@ -170,27 +156,8 @@ model ManagerInvite {
 model ManagerNote {
   id        String   @id @default(cuid())
   inviteId  String
-  body      String   @db.Text
+  body      String
   createdAt DateTime @default(now())
 
   invite ManagerInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
-}
-
-model MetricSnapshot {
-  id          String   @id @default(cuid())
-  userId      String
-  rangeStart  DateTime
-  rangeEnd    DateTime
-  prsMerged   Int
-  prsOpened   Int
-  reviews     Int
-  commits     Int
-  reposActive Int
-  additions   Int
-  deletions   Int
-  computedAt  DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, rangeStart, rangeEnd])
 }

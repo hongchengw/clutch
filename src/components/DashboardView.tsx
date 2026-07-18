@@ -7,11 +7,17 @@ import { MetricHero } from "@/components/MetricHero";
 import { ResumeMetrics } from "@/components/ResumeMetrics";
 import { StandupGenerator } from "@/components/StandupGenerator";
 import { buildCoachingCards } from "@/lib/coaching";
-import { computeMetrics, resumeBullets, topPullRequests } from "@/lib/metrics";
-import { filterEventsByRange, resolveDateRange } from "@/lib/ranges";
-import type { ActivityEvent, DateRangeKey } from "@/lib/types";
+import {
+  computeStreak,
+  filterEventsByRange,
+  metricsFromEvents,
+  resumeBullets,
+  resolveUiRange,
+  topPullRequests,
+} from "@/lib/ui-helpers";
+import type { ActivityEventDTO, StandupRangePreset } from "@/lib/types";
 
-const RANGE_OPTIONS: { key: DateRangeKey; label: string }[] = [
+const RANGE_OPTIONS: { key: StandupRangePreset; label: string }[] = [
   { key: "yesterday", label: "Yesterday" },
   { key: "last7", label: "Last 7 days" },
   { key: "last30", label: "Last 30 days" },
@@ -21,23 +27,17 @@ const RANGE_OPTIONS: { key: DateRangeKey; label: string }[] = [
 export function DashboardView({
   events,
   internshipStart,
-  internshipEnd,
   demo = false,
 }: {
-  events: ActivityEvent[];
+  events: ActivityEventDTO[];
   internshipStart?: string;
-  internshipEnd?: string;
   demo?: boolean;
 }) {
-  const [rangeKey, setRangeKey] = useState<DateRangeKey>("last30");
+  const [rangeKey, setRangeKey] = useState<StandupRangePreset>("last30");
 
   const range = useMemo(
-    () =>
-      resolveDateRange(rangeKey, {
-        internshipStart,
-        internshipEnd,
-      }),
-    [rangeKey, internshipStart, internshipEnd],
+    () => resolveUiRange(rangeKey, { internshipStart }),
+    [rangeKey, internshipStart],
   );
 
   const ranged = useMemo(
@@ -46,7 +46,12 @@ export function DashboardView({
   );
 
   const metrics = useMemo(
-    () => computeMetrics(ranged, range.start, range.end),
+    () => metricsFromEvents(ranged, range.start, range.end),
+    [ranged, range.start, range.end],
+  );
+
+  const streak = useMemo(
+    () => computeStreak(ranged, range.start, range.end),
     [ranged, range.start, range.end],
   );
 
@@ -55,10 +60,7 @@ export function DashboardView({
     () => buildCoachingCards(ranged, metrics),
     [ranged, metrics],
   );
-  const bullets = useMemo(
-    () => resumeBullets(metrics, metrics.reposActive),
-    [metrics],
-  );
+  const bullets = useMemo(() => resumeBullets(metrics), [metrics]);
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6">
@@ -69,7 +71,7 @@ export function DashboardView({
         <select
           className="field w-auto min-w-[160px]"
           value={rangeKey}
-          onChange={(e) => setRangeKey(e.target.value as DateRangeKey)}
+          onChange={(e) => setRangeKey(e.target.value as StandupRangePreset)}
         >
           {RANGE_OPTIONS.map((opt) => (
             <option key={opt.key} value={opt.key}>
@@ -79,7 +81,11 @@ export function DashboardView({
         </select>
       </div>
 
-      <MetricHero metrics={metrics} rangeLabel={range.label} />
+      <MetricHero
+        metrics={metrics}
+        streak={streak}
+        rangeLabel={range.label}
+      />
 
       <section className="space-y-3">
         <h2 className="font-display text-2xl font-semibold">Coaching</h2>
@@ -95,7 +101,9 @@ export function DashboardView({
           <h2 className="font-display text-2xl font-semibold">Top PRs</h2>
           <ul className="panel divide-y divide-[var(--line)] rounded-2xl">
             {topPrs.length === 0 && (
-              <li className="px-5 py-4 text-sm text-[var(--mist)]">No PRs in range.</li>
+              <li className="px-5 py-4 text-sm text-[var(--mist)]">
+                No PRs in range.
+              </li>
             )}
             {topPrs.map((pr) => (
               <li key={pr.id} className="px-5 py-4">
@@ -108,7 +116,8 @@ export function DashboardView({
                   {pr.title}
                 </a>
                 <p className="mt-1 font-mono text-xs text-[var(--mist)]">
-                  +{pr.additions ?? 0} / -{pr.deletions ?? 0} · {pr.filesChanged ?? 0} files
+                  +{pr.additions ?? 0} / -{pr.deletions ?? 0} ·{" "}
+                  {pr.filesChanged ?? 0} files
                 </p>
               </li>
             ))}
@@ -122,7 +131,6 @@ export function DashboardView({
         <StandupGenerator
           events={events}
           internshipStart={internshipStart}
-          internshipEnd={internshipEnd}
           demo={demo}
         />
       </section>

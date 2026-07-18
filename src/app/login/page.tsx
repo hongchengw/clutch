@@ -10,18 +10,20 @@ export default function LoginPage() {
         Connect GitHub
       </h1>
       <p className="mt-3 text-[var(--mist)]">
-        OAuth is owned by Person A&apos;s platform track. When{" "}
-        <code className="font-mono text-[var(--signal)]">/api/auth/signin</code>{" "}
-        lands, this button will start the real flow. Until then, use demo mode.
+        Uses Person A&apos;s Auth.js GitHub OAuth. For a working demo without
+        credentials, use demo mode.
       </p>
       <div className="mt-8 flex flex-col gap-3">
-        <a href="/api/auth/signin/github" className="btn-primary text-center">
+        <Link href="/api/auth/signin" className="btn-primary text-center">
           Continue with GitHub
-        </a>
+        </Link>
         <Link href="/demo" className="btn-ghost text-center">
           Try demo instead
         </Link>
-        <Link href="/" className="text-center text-sm text-[var(--mist)] hover:text-[var(--fog)]">
+        <Link
+          href="/"
+          className="text-center text-sm text-[var(--mist)] hover:text-[var(--fog)]"
+        >
           ← Back to landing
         </Link>
       </div>

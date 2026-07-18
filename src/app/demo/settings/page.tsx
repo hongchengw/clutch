@@ -15,11 +15,14 @@ export default function DemoSettingsPage() {
           <Link href="/app/settings" className="text-[var(--signal)] underline">
             /app/settings
           </Link>{" "}
-          once Person A&apos;s APIs are up. Demo repos are fixed seed data.
+          after GitHub login. Demo repos are fixed seed data.
         </p>
         <ul className="panel mt-6 divide-y divide-[var(--line)] rounded-2xl">
           {demoIntern.repos.map((repo) => (
-            <li key={repo.fullName} className="flex items-center justify-between px-5 py-4">
+            <li
+              key={repo.fullName}
+              className="flex items-center justify-between px-5 py-4"
+            >
               <div>
                 <p className="font-medium">{repo.fullName}</p>
                 <p className="font-mono text-xs text-[var(--mist)]">

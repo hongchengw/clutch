@@ -1,10 +1,10 @@
-import type { ActivityEvent, DemoIntern, RepoListItem } from "@/lib/types";
+import type { ActivityEventDTO, RepoDTO } from "@/lib/types";
 
 const USER_ID = "demo-intern-maya";
 
-const repos: RepoListItem[] = [
+export const demoRepos: RepoDTO[] = [
   {
-    id: "repo-checkout",
+    githubRepoId: "1001",
     owner: "acme-labs",
     name: "checkout-service",
     fullName: "acme-labs/checkout-service",
@@ -13,7 +13,7 @@ const repos: RepoListItem[] = [
     lastSyncedAt: "2026-07-18T09:00:00.000Z",
   },
   {
-    id: "repo-web",
+    githubRepoId: "1002",
     owner: "acme-labs",
     name: "storefront-web",
     fullName: "acme-labs/storefront-web",
@@ -22,7 +22,7 @@ const repos: RepoListItem[] = [
     lastSyncedAt: "2026-07-18T09:00:00.000Z",
   },
   {
-    id: "repo-docs",
+    githubRepoId: "1003",
     owner: "maya-builds",
     name: "intern-notes",
     fullName: "maya-builds/intern-notes",
@@ -33,23 +33,18 @@ const repos: RepoListItem[] = [
 ];
 
 function ev(
-  partial: Omit<ActivityEvent, "userId" | "provider"> & {
-    userId?: string;
-    provider?: ActivityEvent["provider"];
+  partial: Omit<ActivityEventDTO, "provider"> & {
+    provider?: ActivityEventDTO["provider"];
   },
-): ActivityEvent {
-  return {
-    userId: USER_ID,
-    provider: "github",
-    ...partial,
-  };
+): ActivityEventDTO {
+  return { provider: "github", ...partial };
 }
 
 /** Realistic summer-intern activity for demo mode (no OAuth / network). */
-export const demoEvents: ActivityEvent[] = [
+export const demoEvents: ActivityEventDTO[] = [
   ev({
     id: "evt-1",
-    repoId: "repo-checkout",
+    repoId: "1001",
     repoFullName: "acme-labs/checkout-service",
     externalId: "pr-214",
     type: "pr_merged",
@@ -63,11 +58,12 @@ export const demoEvents: ActivityEvent[] = [
   }),
   ev({
     id: "evt-2",
-    repoId: "repo-checkout",
+    repoId: "1001",
     repoFullName: "acme-labs/checkout-service",
     externalId: "commit-a1",
     type: "commit",
     title: "Wire reservation TTL + metrics",
+    summary: null,
     url: "https://github.com/acme-labs/checkout-service/commit/a1b2c3d",
     additions: 86,
     deletions: 12,
@@ -76,11 +72,12 @@ export const demoEvents: ActivityEvent[] = [
   }),
   ev({
     id: "evt-3",
-    repoId: "repo-web",
+    repoId: "1002",
     repoFullName: "acme-labs/storefront-web",
     externalId: "pr-88",
     type: "pr_merged",
     title: "Fix mobile checkout sticky CTA overlap",
+    summary: null,
     url: "https://github.com/acme-labs/storefront-web/pull/88",
     additions: 54,
     deletions: 31,
@@ -89,22 +86,26 @@ export const demoEvents: ActivityEvent[] = [
   }),
   ev({
     id: "evt-4",
-    repoId: "repo-web",
+    repoId: "1002",
     repoFullName: "acme-labs/storefront-web",
     externalId: "review-12",
     type: "review",
     title: "Review: address a11y labels on payment form",
     summary: "Approved with nits on aria-describedby.",
     url: "https://github.com/acme-labs/storefront-web/pull/79#pullrequestreview-1",
+    additions: null,
+    deletions: null,
+    filesChanged: null,
     occurredAt: "2026-06-11T15:40:00.000Z",
   }),
   ev({
     id: "evt-5",
-    repoId: "repo-checkout",
+    repoId: "1001",
     repoFullName: "acme-labs/checkout-service",
     externalId: "pr-221",
     type: "pr_opened",
     title: "Draft: experiment with payment webhook retries",
+    summary: null,
     url: "https://github.com/acme-labs/checkout-service/pull/221",
     additions: 640,
     deletions: 20,
@@ -113,21 +114,26 @@ export const demoEvents: ActivityEvent[] = [
   }),
   ev({
     id: "evt-6",
-    repoId: "repo-checkout",
+    repoId: "1001",
     repoFullName: "acme-labs/checkout-service",
     externalId: "review-19",
     type: "review",
     title: "Review: rate-limit middleware for webhooks",
+    summary: null,
     url: "https://github.com/acme-labs/checkout-service/pull/218#pullrequestreview-2",
+    additions: null,
+    deletions: null,
+    filesChanged: null,
     occurredAt: "2026-06-20T13:15:00.000Z",
   }),
   ev({
     id: "evt-7",
-    repoId: "repo-web",
+    repoId: "1002",
     repoFullName: "acme-labs/storefront-web",
     externalId: "pr-95",
     type: "pr_merged",
     title: "Add order-status skeleton and error boundary",
+    summary: null,
     url: "https://github.com/acme-labs/storefront-web/pull/95",
     additions: 198,
     deletions: 44,
@@ -136,11 +142,12 @@ export const demoEvents: ActivityEvent[] = [
   }),
   ev({
     id: "evt-8",
-    repoId: "repo-docs",
+    repoId: "1003",
     repoFullName: "maya-builds/intern-notes",
     externalId: "commit-b2",
     type: "commit",
     title: "Document checkout failure modes for oncall",
+    summary: null,
     url: "https://github.com/maya-builds/intern-notes/commit/b2c3d4e",
     additions: 120,
     deletions: 0,
@@ -149,7 +156,7 @@ export const demoEvents: ActivityEvent[] = [
   }),
   ev({
     id: "evt-9",
-    repoId: "repo-checkout",
+    repoId: "1001",
     repoFullName: "acme-labs/checkout-service",
     externalId: "pr-230",
     type: "pr_merged",
@@ -163,31 +170,40 @@ export const demoEvents: ActivityEvent[] = [
   }),
   ev({
     id: "evt-10",
-    repoId: "repo-web",
+    repoId: "1002",
     repoFullName: "acme-labs/storefront-web",
     externalId: "review-31",
     type: "review",
     title: "Review: promo banner feature flag",
+    summary: null,
     url: "https://github.com/acme-labs/storefront-web/pull/101#pullrequestreview-3",
+    additions: null,
+    deletions: null,
+    filesChanged: null,
     occurredAt: "2026-07-09T11:20:00.000Z",
   }),
   ev({
     id: "evt-11",
-    repoId: "repo-checkout",
+    repoId: "1001",
     repoFullName: "acme-labs/checkout-service",
     externalId: "issue-44",
     type: "issue_opened",
     title: "Investigate flaky checkout e2e on staging",
+    summary: null,
     url: "https://github.com/acme-labs/checkout-service/issues/44",
+    additions: null,
+    deletions: null,
+    filesChanged: null,
     occurredAt: "2026-07-14T10:05:00.000Z",
   }),
   ev({
     id: "evt-12",
-    repoId: "repo-web",
+    repoId: "1002",
     repoFullName: "acme-labs/storefront-web",
     externalId: "pr-110",
     type: "pr_merged",
     title: "Surface shipping ETA from checkout API",
+    summary: null,
     url: "https://github.com/acme-labs/storefront-web/pull/110",
     additions: 167,
     deletions: 22,
@@ -196,11 +212,12 @@ export const demoEvents: ActivityEvent[] = [
   }),
   ev({
     id: "evt-13",
-    repoId: "repo-checkout",
+    repoId: "1001",
     repoFullName: "acme-labs/checkout-service",
     externalId: "commit-c3",
     type: "commit",
     title: "Tighten ETA caching headers",
+    summary: null,
     url: "https://github.com/acme-labs/checkout-service/commit/c3d4e5f",
     additions: 41,
     deletions: 9,
@@ -209,25 +226,26 @@ export const demoEvents: ActivityEvent[] = [
   }),
   ev({
     id: "evt-14",
-    repoId: "repo-web",
+    repoId: "1002",
     repoFullName: "acme-labs/storefront-web",
     externalId: "pr-112",
     type: "pr_opened",
     title: "Add resume-friendly contribution export hook",
+    summary: null,
     url: "https://github.com/acme-labs/storefront-web/pull/112",
     additions: 90,
     deletions: 4,
     filesChanged: 3,
     occurredAt: "2026-07-17T22:15:00.000Z",
   }),
-  // Sparse period to trigger consistency coaching
   ev({
     id: "evt-15",
-    repoId: "repo-checkout",
+    repoId: "1001",
     repoFullName: "acme-labs/checkout-service",
     externalId: "commit-gap",
     type: "commit",
     title: "chore: bump checkout client SDK",
+    summary: null,
     url: "https://github.com/acme-labs/checkout-service/commit/d4e5f6a",
     additions: 8,
     deletions: 8,
@@ -236,29 +254,12 @@ export const demoEvents: ActivityEvent[] = [
   }),
 ];
 
-export const demoIntern: DemoIntern = {
+export const demoIntern = {
   id: USER_ID,
   name: "Maya Chen",
   githubUsername: "maya-builds",
   internshipStartDate: "2026-05-26T00:00:00.000Z",
   internshipEndDate: "2026-08-14T23:59:59.000Z",
-  repos,
+  repos: demoRepos,
   events: demoEvents,
 };
-
-export function getDemoEventsInRange(
-  start: Date,
-  end: Date,
-): ActivityEvent[] {
-  const s = start.getTime();
-  const e = end.getTime();
-  return demoEvents
-    .filter((event) => {
-      const t = new Date(event.occurredAt).getTime();
-      return t >= s && t <= e;
-    })
-    .sort(
-      (a, b) =>
-        new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
-    );
-}

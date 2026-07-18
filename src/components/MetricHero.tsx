@@ -1,17 +1,19 @@
-import type { MetricsSummary } from "@/lib/types";
+import type { MetricsDTO } from "@/lib/types";
 
 export function MetricHero({
   metrics,
+  streak,
   rangeLabel,
 }: {
-  metrics: MetricsSummary;
+  metrics: MetricsDTO;
+  streak: number;
   rangeLabel: string;
 }) {
   const stats = [
-    { label: "Streak", value: `${metrics.streak}d` },
+    { label: "Streak", value: `${streak}d` },
     { label: "PRs merged", value: String(metrics.prsMerged) },
-    { label: "Reviews", value: String(metrics.reviews) },
-    { label: "Repos active", value: String(metrics.reposActive) },
+    { label: "Reviews", value: String(metrics.reviewsGiven) },
+    { label: "Repos active", value: String(metrics.activeRepos) },
   ];
 
   return (

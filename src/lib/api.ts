@@ -1,17 +1,22 @@
 import type {
-  ActivityEvent,
-  GenerateStandupRequest,
-  GenerateStandupResponse,
-  MetricsSummary,
-  RepoListItem,
-  StandupDoc,
+  ActivityEventDTO,
+  MetricsDTO,
+  RepoDTO,
+  StandupDocDTO,
+  StandupLength,
+  StandupRangePreset,
+  StandupTone,
+  SyncResponse,
 } from "@/lib/types";
 
 /**
  * Thin client for Person A's APIs.
- * Never throws on missing routes — returns null so UI can fall back to demo / empty states.
+ * Never throws on missing/unauthorized routes — returns null so UI can fall back.
  */
-async function safeJson<T>(input: RequestInfo, init?: RequestInit): Promise<T | null> {
+async function safeJson<T>(
+  input: RequestInfo,
+  init?: RequestInit,
+): Promise<T | null> {
   try {
     const res = await fetch(input, {
       ...init,
@@ -30,45 +35,57 @@ async function safeJson<T>(input: RequestInfo, init?: RequestInit): Promise<T | 
 export async function fetchActivity(
   start: string,
   end: string,
-): Promise<ActivityEvent[] | null> {
-  return safeJson<ActivityEvent[]>(
+): Promise<ActivityEventDTO[] | null> {
+  const data = await safeJson<{ events: ActivityEventDTO[] }>(
     `/api/activity?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
   );
+  return data?.events ?? null;
 }
 
 export async function fetchMetrics(
   start: string,
   end: string,
-): Promise<MetricsSummary | null> {
-  return safeJson<MetricsSummary>(
+): Promise<MetricsDTO | null> {
+  return safeJson<MetricsDTO>(
     `/api/metrics?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
   );
 }
 
-export async function fetchRepos(): Promise<RepoListItem[] | null> {
-  return safeJson<RepoListItem[]>("/api/repos");
+export async function fetchRepos(): Promise<RepoDTO[] | null> {
+  const data = await safeJson<{ repos: RepoDTO[] }>("/api/repos");
+  return data?.repos ?? null;
 }
 
-export async function saveRepoSelection(
-  fullNames: string[],
-): Promise<boolean> {
+export async function saveRepoSelection(repos: RepoDTO[]): Promise<boolean> {
   const res = await safeJson<{ ok?: boolean }>("/api/repos/selection", {
     method: "POST",
-    body: JSON.stringify({ included: fullNames }),
+    body: JSON.stringify({
+      repos: repos.map((r) => ({
+        githubRepoId: r.githubRepoId,
+        owner: r.owner,
+        name: r.name,
+        fullName: r.fullName,
+        private: r.private,
+        included: r.included,
+      })),
+    }),
   });
   return Boolean(res);
 }
 
-export async function triggerSync(): Promise<{
-  lastSyncedAt?: string;
-} | null> {
-  return safeJson("/api/sync", { method: "POST" });
+export async function triggerSync(): Promise<SyncResponse | null> {
+  return safeJson<SyncResponse>("/api/sync", { method: "POST" });
 }
 
-export async function generateStandupApi(
-  body: GenerateStandupRequest,
-): Promise<GenerateStandupResponse | null> {
-  return safeJson<GenerateStandupResponse>("/api/standups/generate", {
+export async function generateStandupApi(body: {
+  preset: StandupRangePreset;
+  start?: string;
+  end?: string;
+  tone: StandupTone;
+  length: StandupLength;
+  highlightMode?: boolean;
+}): Promise<StandupDocDTO | null> {
+  return safeJson<StandupDocDTO>("/api/standups/generate", {
     method: "POST",
     body: JSON.stringify(body),
   });
@@ -77,14 +94,10 @@ export async function generateStandupApi(
 export async function patchStandup(
   id: string,
   contentMd: string,
-  contentJson: StandupDoc["contentJson"],
-): Promise<StandupDoc | null> {
-  return safeJson<StandupDoc>(`/api/standups/${id}`, {
+  contentJson: StandupDocDTO["contentJson"],
+): Promise<StandupDocDTO | null> {
+  return safeJson<StandupDocDTO>(`/api/standups/${id}`, {
     method: "PATCH",
     body: JSON.stringify({ contentMd, contentJson }),
   });
-}
-
-export async function listStandups(): Promise<StandupDoc[] | null> {
-  return safeJson<StandupDoc[]>("/api/standups");
 }

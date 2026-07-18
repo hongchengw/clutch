@@ -4,10 +4,6 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { patchStandup } from "@/lib/api";
 
-/**
- * Editable standup detail. Persists via Person A's PATCH when available;
- * otherwise keeps edits in localStorage so the UI never hard-fails.
- */
 export default function StandupDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -28,8 +24,8 @@ export default function StandupDetailPage() {
 
   async function onSave() {
     const saved = await patchStandup(id, contentMd, {
-      whatIDid: [],
-      whatsNext: [],
+      didYesterday: [],
+      doingNext: [],
       blockers: [],
       proofLinks: [],
     });

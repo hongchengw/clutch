@@ -1,22 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  generateTemplateStandup,
-  standupToMarkdown,
-} from "@/lib/ai/templateStandup";
-import { validateAndStripCitations } from "@/lib/ai/validateCitations";
 import { generateStandupApi } from "@/lib/api";
-import { filterEventsByRange, resolveDateRange } from "@/lib/ranges";
+import { generateStandup } from "@/lib/standup";
+import { filterEventsByRange, resolveUiRange } from "@/lib/ui-helpers";
 import type {
-  ActivityEvent,
-  DateRangeKey,
+  ActivityEventDTO,
   StandupContent,
   StandupLength,
+  StandupRangePreset,
   StandupTone,
 } from "@/lib/types";
 
-const RANGES: { key: DateRangeKey; label: string }[] = [
+const RANGES: { key: StandupRangePreset; label: string }[] = [
   { key: "yesterday", label: "Yesterday" },
   { key: "last7", label: "Last 7 days" },
   { key: "last30", label: "Last 30 days" },
@@ -24,43 +20,18 @@ const RANGES: { key: DateRangeKey; label: string }[] = [
   { key: "custom", label: "Custom" },
 ];
 
-function localGenerate(
-  events: ActivityEvent[],
-  tone: StandupTone,
-  length: StandupLength,
-  highlightMode: boolean,
-  rangeStart: string,
-  rangeEnd: string,
-) {
-  const templated = generateTemplateStandup(events, {
-    rangeStart,
-    rangeEnd,
-    tone,
-    length,
-    highlightMode,
-  });
-  const validated = validateAndStripCitations(templated.contentJson, events);
-  return {
-    contentMd: standupToMarkdown(validated.content),
-    contentJson: validated.content,
-    eventIds: validated.eventIds,
-  };
-}
-
 export function StandupGenerator({
   events,
   internshipStart,
-  internshipEnd,
   demo = false,
   storageKey = "shiplog-standup-draft",
 }: {
-  events: ActivityEvent[];
+  events: ActivityEventDTO[];
   internshipStart?: string;
-  internshipEnd?: string;
   demo?: boolean;
   storageKey?: string;
 }) {
-  const [rangeKey, setRangeKey] = useState<DateRangeKey>("last7");
+  const [rangeKey, setRangeKey] = useState<StandupRangePreset>("last7");
   const [customStart, setCustomStart] = useState("2026-07-01");
   const [customEnd, setCustomEnd] = useState("2026-07-18");
   const [tone, setTone] = useState<StandupTone>("casual");
@@ -74,13 +45,12 @@ export function StandupGenerator({
 
   const range = useMemo(
     () =>
-      resolveDateRange(rangeKey, {
+      resolveUiRange(rangeKey, {
         customStart,
         customEnd,
         internshipStart,
-        internshipEnd,
       }),
-    [rangeKey, customStart, customEnd, internshipStart, internshipEnd],
+    [rangeKey, customStart, customEnd, internshipStart],
   );
 
   const rangedEvents = useMemo(
@@ -91,14 +61,13 @@ export function StandupGenerator({
   async function onGenerate() {
     setBusy(true);
     setStatus(null);
-    const rangeStart = range.start.toISOString();
-    const rangeEnd = range.end.toISOString();
 
     try {
       if (!demo) {
         const apiResult = await generateStandupApi({
-          rangeStart,
-          rangeEnd,
+          preset: rangeKey,
+          start: rangeKey === "custom" ? range.start.toISOString() : undefined,
+          end: rangeKey === "custom" ? range.end.toISOString() : undefined,
           tone,
           length,
           highlightMode,
@@ -106,39 +75,25 @@ export function StandupGenerator({
         if (apiResult) {
           setContentMd(apiResult.contentMd);
           setContentJson(apiResult.contentJson);
-          setStatus(
-            apiResult.id
-              ? `Saved as ${apiResult.id}`
-              : "Generated via API (not persisted yet)",
-          );
-          if (typeof window !== "undefined") {
-            window.localStorage.setItem(
-              storageKey,
-              JSON.stringify(apiResult),
-            );
-          }
+          setStatus(`Saved standup ${apiResult.id}`);
+          window.localStorage.setItem(storageKey, JSON.stringify(apiResult));
           return;
         }
       }
 
-      const local = localGenerate(
-        rangedEvents,
+      const local = generateStandup(rangedEvents, {
         tone,
         length,
         highlightMode,
-        rangeStart,
-        rangeEnd,
-      );
+      });
       setContentMd(local.contentMd);
       setContentJson(local.contentJson);
       setStatus(
         demo
-          ? `Generated from ${rangedEvents.length} demo events (template engine)`
-          : `API not ready yet — generated locally from ${rangedEvents.length} events`,
+          ? `Generated from ${rangedEvents.length} demo events (Person A template engine)`
+          : `API not ready/authorized — generated locally from ${rangedEvents.length} events`,
       );
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(storageKey, JSON.stringify(local));
-      }
+      window.localStorage.setItem(storageKey, JSON.stringify(local));
     } finally {
       setBusy(false);
     }
@@ -158,7 +113,9 @@ export function StandupGenerator({
           <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--signal)]">
             Generate standup
           </p>
-          <h2 className="mt-1 font-display text-2xl font-semibold">Make it review-ready</h2>
+          <h2 className="mt-1 font-display text-2xl font-semibold">
+            Make it review-ready
+          </h2>
         </div>
 
         <label className="block text-sm text-[var(--mist)]">
@@ -166,7 +123,7 @@ export function StandupGenerator({
           <select
             className="field mt-1"
             value={rangeKey}
-            onChange={(e) => setRangeKey(e.target.value as DateRangeKey)}
+            onChange={(e) => setRangeKey(e.target.value as StandupRangePreset)}
           >
             {RANGES.map((r) => (
               <option key={r.key} value={r.key}>
@@ -267,17 +224,17 @@ export function StandupGenerator({
           onChange={(e) => setContentMd(e.target.value)}
           placeholder="Hit Generate standup — every claim should keep a proof link."
         />
-        {contentJson && (
+        {contentJson && contentJson.proofLinks.length > 0 && (
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {contentJson.proofLinks.map((link) => (
               <a
-                key={`${link.eventId}-${link.text}`}
+                key={`${link.url}-${link.label}`}
                 href={link.url}
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-xl border border-[var(--line)] px-3 py-2 text-sm text-[var(--signal)] hover:border-[var(--signal)]"
               >
-                {link.text}
+                {link.label}
               </a>
             ))}
           </div>

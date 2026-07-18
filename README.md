@@ -1,37 +1,80 @@
 # ShipLog
 
-Your commits already tell the story. We write the review.
+*Your commits already tell the story. We write the review.*
 
-Intern performance & standup tool — see [SPEC.md](./SPEC.md) and [TASK.md](./TASK.md).
+ShipLog turns real GitHub activity into standup docs, review-ready summaries, and resume metrics — with receipts. See [SPEC.md](./SPEC.md) for the full product spec and [TASK.md](./TASK.md) for the MVP build plan.
 
-## Quick start
+**Status:** Person A's platform/data layer (auth, sync, metrics, standups APIs) is implemented and fully unit-tested. Person B's UI (landing, dashboard, generator UI, demo mode) is up next.
+
+## Stack
+
+Next.js 15 (App Router) · TypeScript · Tailwind v4 · Prisma + PostgreSQL · NextAuth v5 (GitHub OAuth) · Vitest · ESLint
+
+## Setup
+
+1. **Install** (Node 20+):
+
+   ```bash
+   npm install
+   ```
+
+2. **Environment** — copy `.env.example` to `.env` and fill in:
+
+   | Var | What |
+   |-----|------|
+   | `DATABASE_URL` | PostgreSQL connection string (Neon/Supabase/local) |
+   | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app (callback: `http://localhost:3000/api/auth/callback/github`) |
+   | `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
+   | `TOKEN_ENCRYPTION_KEY` | `openssl rand -base64 32` — encrypts OAuth tokens at rest |
+   | `AI_API_KEY` | Optional; standups fall back to a template generator without it |
+
+3. **Database**:
+
+   ```bash
+   npx prisma migrate dev
+   ```
+
+4. **Run**:
+
+   ```bash
+   npm run dev
+   ```
+
+## Tests & quality gates
+
+The whole suite runs offline — no database, GitHub app, or network needed (Prisma and the GitHub client are injected/mocked):
 
 ```bash
-npm install
-cp .env.example .env
-npm run dev
+npm test           # vitest (70 tests across A1–A5)
+npm run lint       # eslint
+npm run typecheck  # tsc --noEmit
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+The git history is test-first: each `test(aN): …` commit lands failing specs, and the following `feat(aN): …` commit makes them pass.
 
-- Landing: `/`
-- Demo (no OAuth): `/demo`
-- App shell: `/app` (falls back to seed data until Person A’s APIs exist)
+## API surface (Person A)
 
-## Env vars
+| Route | Purpose |
+|-------|---------|
+| `GET/POST /api/auth/[...nextauth]` | GitHub OAuth (scopes: `read:user user:email repo`) |
+| `PATCH /api/user` | Set internship start/end dates |
+| `GET /api/repos` | List accessible repos merged with saved selections |
+| `POST /api/repos/selection` | Choose which repos ShipLog may read |
+| `POST /api/sync` | Incremental sync of commits/PRs/reviews into ActivityEvents |
+| `GET /api/activity?start=&end=` | Range-filtered events |
+| `GET /api/metrics?start=&end=` | SPEC §12 metrics (PRs, reviews, commits, active repos, consistency) |
+| `POST /api/standups/generate` | Generate + persist a grounded standup (every bullet cites events) |
+| `GET /api/standups`, `GET/PATCH /api/standups/:id` | History, fetch, user edits |
 
-See [.env.example](./.env.example):
+## Demo mode
 
-| Var | Who | Purpose |
-|-----|-----|---------|
-| `DATABASE_URL` | A | Postgres |
-| `NEXTAUTH_*` / `GITHUB_*` | A | OAuth |
-| `TOKEN_ENCRYPTION_KEY` | A | Encrypt GitHub tokens |
-| `OPENAI_*` | B | Optional AI standups (template fallback if unset) |
+Planned as Person B's task B2 (`/demo`, seeded data, no OAuth) — not yet implemented.
 
-## Work split
+## Person B UI routes
 
-- **Person A** — auth, GitHub sync, API routes, Prisma wiring
-- **Person B** — landing, demo, dashboard UI, standup generator (`src/lib/ai`), settings UI
+- `/` — landing (hackathon pitch)
+- `/demo` — offline demo dashboard + standup generator (no OAuth)
+- `/app` — authenticated shell (falls back to seed data if APIs unavailable)
+- `/app/standups`, `/app/settings`, `/login`
 
-Shared contracts live in `src/lib/types.ts`.
+Shared contracts: `src/lib/types.ts` (Person A API DTOs).
