@@ -32,8 +32,14 @@ export interface SignInDb {
           providerAccountId: string;
         };
       };
-      create: Record<string, unknown> & { access_token: string };
-      update: Record<string, unknown> & { access_token: string };
+      create: {
+        userId: string;
+        type: string;
+        provider: string;
+        providerAccountId: string;
+        access_token: string;
+      };
+      update: { access_token: string };
     }): Promise<unknown>;
   };
 }
