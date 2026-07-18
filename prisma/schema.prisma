@@ -1,0 +1,196 @@
+// ShipLog MVP schema — SPEC §11
+// Person A owns auth/sync wiring; Person B consumes ActivityEvent / StandupDoc shapes via src/lib/types.ts
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// DATABASE_URL is configured in prisma.config.ts (Prisma 7+)
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  intern
+  manager
+  org_admin
+}
+
+enum Provider {
+  github
+  gitlab
+}
+
+enum ActivityType {
+  commit
+  pr_opened
+  pr_merged
+  pr_closed
+  review
+  issue_opened
+  issue_closed
+  comment
+}
+
+model User {
+  id                  String    @id @default(cuid())
+  email               String?   @unique
+  name                String?
+  image               String?
+  githubId            String?   @unique
+  githubUsername      String?
+  role                Role      @default(intern)
+  internshipStartDate DateTime?
+  internshipEndDate   DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  accounts        Account[]
+  sessions        Session[]
+  repoSelections  RepoSelection[]
+  activityEvents  ActivityEvent[]
+  standupDocs     StandupDoc[]
+  managerInvites  ManagerInvite[]
+  metricSnapshots MetricSnapshot[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model RepoSelection {
+  id            String    @id @default(cuid())
+  userId        String
+  provider      Provider  @default(github)
+  owner         String
+  name          String
+  fullName      String
+  githubRepoId  String?
+  private       Boolean   @default(false)
+  included      Boolean   @default(true)
+  lastSyncedAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityEvents ActivityEvent[]
+
+  @@unique([userId, provider, fullName])
+  @@index([userId, included])
+}
+
+model ActivityEvent {
+  id           String       @id @default(cuid())
+  userId       String
+  repoId       String?
+  provider     Provider     @default(github)
+  externalId   String
+  type         ActivityType
+  title        String
+  summary      String?
+  url          String
+  additions    Int?
+  deletions    Int?
+  filesChanged Int?
+  occurredAt   DateTime
+  rawJson      Json?
+  createdAt    DateTime     @default(now())
+
+  user User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repo RepoSelection? @relation(fields: [repoId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, provider, externalId])
+  @@index([userId, occurredAt])
+  @@index([userId, type])
+}
+
+model StandupDoc {
+  id         String   @id @default(cuid())
+  userId     String
+  rangeStart DateTime
+  rangeEnd   DateTime
+  tone       String
+  length     String
+  contentMd  String   @db.Text
+  contentJson Json?
+  eventIds   String[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model ManagerInvite {
+  id         String    @id @default(cuid())
+  userId     String
+  token      String    @unique
+  email      String?
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+  permissions Json?
+  createdAt  DateTime  @default(now())
+
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes ManagerNote[]
+}
+
+model ManagerNote {
+  id        String   @id @default(cuid())
+  inviteId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  invite ManagerInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+}
+
+model MetricSnapshot {
+  id          String   @id @default(cuid())
+  userId      String
+  rangeStart  DateTime
+  rangeEnd    DateTime
+  prsMerged   Int
+  prsOpened   Int
+  reviews     Int
+  commits     Int
+  reposActive Int
+  additions   Int
+  deletions   Int
+  computedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, rangeStart, rangeEnd])
+}
