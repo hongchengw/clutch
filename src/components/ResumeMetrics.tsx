@@ -19,10 +19,15 @@ export function ResumeMetrics({ bullets }: { bullets: string[] }) {
     <div className="panel rounded-[12px] p-5">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--pale-yellow-ink)]">
-            Resume metrics
+          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--pale-blue-ink)]">
+            Resume metrics · XYZ
           </p>
-          <h3 className="mt-1 font-display text-xl font-semibold">Copy-ready bullets</h3>
+          <h3 className="mt-1 font-display text-2xl font-medium text-[var(--accent-blue)]">
+            Copy-ready bullets
+          </h3>
+          <p className="mt-1 text-xs text-[var(--muted)]">
+            Google format: Accomplished X as measured by Y, by doing Z.
+          </p>
         </div>
       </div>
       <ul className="mt-4 space-y-3">

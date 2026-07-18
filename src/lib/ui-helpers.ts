@@ -110,10 +110,12 @@ export function topPullRequests(events: ActivityEventDTO[], limit = 5) {
     .map((x) => x.event);
 }
 
+/** Google XYZ resume bullets: Accomplished [X] as measured by [Y], by doing [Z]. */
 export function resumeBullets(metrics: MetricsDTO) {
+  const consistencyPct = Math.round(metrics.consistency * 100);
   return [
-    `Merged ${metrics.prsMerged} pull requests across ${metrics.activeRepos} production repositories`,
-    `Completed ${metrics.reviewsGiven} code reviews for teammates`,
-    `Authored ${metrics.commits} commits in the selected range`,
+    `Accomplished shipping ${metrics.prsMerged} merged pull requests across ${metrics.activeRepos} repositories as measured by GitHub merge history, by owning features end-to-end from implementation through review.`,
+    `Accomplished strengthening code quality with ${metrics.reviewsGiven} teammate code reviews as measured by submitted review count, by giving actionable feedback on pull requests before merge.`,
+    `Accomplished sustaining ${consistencyPct}% working-day consistency with ${metrics.commits} commits as measured by active contribution days, by keeping a steady delivery cadence across the internship range.`,
   ];
 }

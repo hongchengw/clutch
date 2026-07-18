@@ -20,7 +20,7 @@ export default function LandingPage() {
       <section className="mx-auto grid min-h-[calc(100vh-88px)] max-w-5xl items-center gap-12 px-4 pb-20 pt-8 sm:px-6 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
           <p className="anim-rise tag tag-blue">For interns who ship</p>
-          <h1 className="anim-rise-delay mt-5 font-display text-6xl font-medium text-[var(--ink-strong)] sm:text-7xl">
+          <h1 className="anim-rise-delay mt-5 font-display text-7xl font-medium text-[var(--accent-blue)] sm:text-8xl">
             Clutch
           </h1>
           <p className="anim-rise-delay mt-5 max-w-xl text-xl text-[var(--ink)] sm:text-2xl">

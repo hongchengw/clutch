@@ -2,11 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { ActivityTimeline } from "@/components/ActivityTimeline";
-import { CoachingCards } from "@/components/CoachingCards";
 import { MetricHero } from "@/components/MetricHero";
 import { ResumeMetrics } from "@/components/ResumeMetrics";
 import { StandupGenerator } from "@/components/StandupGenerator";
-import { buildCoachingCards } from "@/lib/coaching";
 import {
   computeStreak,
   filterEventsByRange,
@@ -56,10 +54,6 @@ export function DashboardView({
   );
 
   const topPrs = useMemo(() => topPullRequests(ranged, 5), [ranged]);
-  const coaching = useMemo(
-    () => buildCoachingCards(ranged, metrics),
-    [ranged, metrics],
-  );
   const bullets = useMemo(() => resumeBullets(metrics), [metrics]);
 
   return (
@@ -87,18 +81,17 @@ export function DashboardView({
         rangeLabel={range.label}
       />
 
-      <section className="space-y-3">
-        <h2 className="font-display text-2xl font-semibold">Coaching</h2>
-        <CoachingCards cards={coaching} />
-      </section>
-
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="space-y-3">
-          <h2 className="font-display text-2xl font-semibold">Activity</h2>
+          <h2 className="font-display text-3xl font-medium text-[var(--accent-blue)] sm:text-4xl">
+            Activity
+          </h2>
           <ActivityTimeline events={ranged} />
         </section>
         <section className="space-y-3">
-          <h2 className="font-display text-2xl font-semibold">Top PRs</h2>
+          <h2 className="font-display text-3xl font-medium text-[var(--accent-blue)] sm:text-4xl">
+            Top PRs
+          </h2>
           <ul className="panel divide-y divide-[var(--line)] rounded-[12px]">
             {topPrs.length === 0 && (
               <li className="px-5 py-4 text-sm text-[var(--muted)]">
@@ -127,7 +120,9 @@ export function DashboardView({
       </div>
 
       <section className="space-y-3">
-        <h2 className="font-display text-2xl font-semibold">Standup generator</h2>
+        <h2 className="font-display text-3xl font-medium text-[var(--accent-blue)] sm:text-4xl">
+          Standup generator
+        </h2>
         <StandupGenerator
           events={events}
           internshipStart={internshipStart}

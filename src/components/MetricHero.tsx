@@ -18,12 +18,12 @@ export function MetricHero({
 
   return (
     <section className="panel overflow-hidden !rounded-[12px]">
-      <div className="border-b border-[var(--line)] px-6 py-6 sm:px-8">
-        <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--muted)]">
+      <div className="border-b border-[var(--line)] border-l-4 border-l-[var(--accent-blue)] px-6 py-6 sm:px-8">
+        <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--pale-blue-ink)]">
           Contribution pulse · {rangeLabel}
         </p>
-        <h1 className="mt-2 font-display text-3xl font-medium text-[var(--ink-strong)] sm:text-4xl">
-          Proof over vibes.
+        <h1 className="mt-2 font-display text-5xl font-medium text-[var(--accent-blue)] sm:text-6xl">
+          Stats
         </h1>
         <p className="mt-2 max-w-xl text-sm text-[var(--muted)]">
           Consistency {Math.round(metrics.consistency * 100)}% of working days ·{" "}
@@ -36,7 +36,7 @@ export function MetricHero({
             <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--muted)]">
               {stat.label}
             </p>
-            <p className="mt-2 font-display text-3xl text-[var(--ink-strong)]">
+            <p className="mt-2 font-display text-3xl text-[var(--accent-blue)]">
               {stat.value}
             </p>
           </div>
