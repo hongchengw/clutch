@@ -10,7 +10,7 @@ export default function DemoStandupsPage() {
       <AppNav demo basePath="/demo" />
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <h1 className="font-display text-3xl font-bold">Standups</h1>
-        <p className="mt-2 text-sm text-[var(--mist)]">
+        <p className="mt-2 text-sm text-[var(--muted)]">
           Demo generator — template engine, no OAuth, no network.
         </p>
         <div className="mt-6">

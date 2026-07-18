@@ -65,7 +65,7 @@ export function DashboardView({
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-[var(--mist)]">
+        <p className="text-sm text-[var(--muted)]">
           {demo ? "Maya Chen · demo intern" : "Your contribution dashboard"}
         </p>
         <select
@@ -99,9 +99,9 @@ export function DashboardView({
         </section>
         <section className="space-y-3">
           <h2 className="font-display text-2xl font-semibold">Top PRs</h2>
-          <ul className="panel divide-y divide-[var(--line)] rounded-2xl">
+          <ul className="panel divide-y divide-[var(--line)] rounded-[12px]">
             {topPrs.length === 0 && (
-              <li className="px-5 py-4 text-sm text-[var(--mist)]">
+              <li className="px-5 py-4 text-sm text-[var(--muted)]">
                 No PRs in range.
               </li>
             )}
@@ -111,11 +111,11 @@ export function DashboardView({
                   href={pr.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-medium hover:text-[var(--signal)]"
+                  className="font-medium hover:text-[var(--pale-blue-ink)]"
                 >
                   {pr.title}
                 </a>
-                <p className="mt-1 font-mono text-xs text-[var(--mist)]">
+                <p className="mt-1 font-mono text-xs text-[var(--muted)]">
                   +{pr.additions ?? 0} / -{pr.deletions ?? 0} ·{" "}
                   {pr.filesChanged ?? 0} files
                 </p>

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ShipLog — Your commits already tell the story",
+  title: "Clutch — Your commits already tell the story",
   description:
-    "Auto standup docs, manager-ready contribution proof, and resume metrics from your GitHub. The dream way to earn your return offer.",
+    "Clutch turns GitHub activity into standups, contribution proof, and manager-ready review packets for interns.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <div className="ambient" aria-hidden />
+        <div className="relative z-10">{children}</div>
+      </body>
     </html>
   );
 }

@@ -3,7 +3,7 @@ import type { CoachingCard } from "@/lib/coaching";
 export function CoachingCards({ cards }: { cards: CoachingCard[] }) {
   if (cards.length === 0) {
     return (
-      <div className="panel rounded-2xl p-5 text-sm text-[var(--mist)]">
+      <div className="panel p-5 text-sm text-[var(--muted)]">
         No coaching nudges for this range — keep shipping.
       </div>
     );
@@ -11,17 +11,17 @@ export function CoachingCards({ cards }: { cards: CoachingCard[] }) {
 
   return (
     <div className="grid gap-3 md:grid-cols-3">
-      {cards.map((card) => (
-        <article key={card.id} className="panel rounded-2xl p-5">
-          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--signal)]">
-            Coach
-          </p>
-          <h3 className="mt-2 font-display text-lg font-semibold text-[var(--paper)]">
+      {cards.map((card, index) => (
+        <article
+          key={card.id}
+          className="panel p-5"
+          style={{ animationDelay: `${index * 80}ms` }}
+        >
+          <p className="tag tag-blue">Coach</p>
+          <h3 className="mt-3 font-display text-xl font-medium text-[var(--ink-strong)]">
             {card.title}
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--mist)]">
-            {card.body}
-          </p>
+          <p className="mt-2 text-sm text-[var(--muted)]">{card.body}</p>
         </article>
       ))}
     </div>

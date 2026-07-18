@@ -10,14 +10,14 @@ export default function DemoSettingsPage() {
       <AppNav demo basePath="/demo" />
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <h1 className="font-display text-3xl font-bold">Settings (demo)</h1>
-        <p className="mt-2 text-sm text-[var(--mist)]">
+        <p className="mt-2 text-sm text-[var(--muted)]">
           Repo picker and sync are live on{" "}
-          <Link href="/app/settings" className="text-[var(--signal)] underline">
+          <Link href="/app/settings" className="text-[var(--pale-blue-ink)] underline">
             /app/settings
           </Link>{" "}
           after GitHub login. Demo repos are fixed seed data.
         </p>
-        <ul className="panel mt-6 divide-y divide-[var(--line)] rounded-2xl">
+        <ul className="panel mt-6 divide-y divide-[var(--line)] rounded-[12px]">
           {demoIntern.repos.map((repo) => (
             <li
               key={repo.fullName}
@@ -25,11 +25,11 @@ export default function DemoSettingsPage() {
             >
               <div>
                 <p className="font-medium">{repo.fullName}</p>
-                <p className="font-mono text-xs text-[var(--mist)]">
+                <p className="font-mono text-xs text-[var(--muted)]">
                   {repo.private ? "private" : "public"} · included
                 </p>
               </div>
-              <span className="text-[var(--signal)]">✓</span>
+              <span className="text-[var(--pale-blue-ink)]">✓</span>
             </li>
           ))}
         </ul>

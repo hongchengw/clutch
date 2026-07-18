@@ -24,7 +24,7 @@ export function StandupGenerator({
   events,
   internshipStart,
   demo = false,
-  storageKey = "shiplog-standup-draft",
+  storageKey = "clutch-standup-draft",
 }: {
   events: ActivityEventDTO[];
   internshipStart?: string;
@@ -108,9 +108,9 @@ export function StandupGenerator({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
-      <aside className="panel space-y-4 rounded-2xl p-5">
+      <aside className="panel space-y-4 rounded-[12px] p-5">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--signal)]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--pale-blue-ink)]">
             Generate standup
           </p>
           <h2 className="mt-1 font-display text-2xl font-semibold">
@@ -118,7 +118,7 @@ export function StandupGenerator({
           </h2>
         </div>
 
-        <label className="block text-sm text-[var(--mist)]">
+        <label className="block text-sm text-[var(--muted)]">
           Range
           <select
             className="field mt-1"
@@ -135,7 +135,7 @@ export function StandupGenerator({
 
         {rangeKey === "custom" && (
           <div className="grid grid-cols-2 gap-2">
-            <label className="block text-sm text-[var(--mist)]">
+            <label className="block text-sm text-[var(--muted)]">
               Start
               <input
                 type="date"
@@ -144,7 +144,7 @@ export function StandupGenerator({
                 onChange={(e) => setCustomStart(e.target.value)}
               />
             </label>
-            <label className="block text-sm text-[var(--mist)]">
+            <label className="block text-sm text-[var(--muted)]">
               End
               <input
                 type="date"
@@ -156,7 +156,7 @@ export function StandupGenerator({
           </div>
         )}
 
-        <label className="block text-sm text-[var(--mist)]">
+        <label className="block text-sm text-[var(--muted)]">
           Tone
           <select
             className="field mt-1"
@@ -169,7 +169,7 @@ export function StandupGenerator({
           </select>
         </label>
 
-        <label className="block text-sm text-[var(--mist)]">
+        <label className="block text-sm text-[var(--muted)]">
           Length
           <select
             className="field mt-1"
@@ -182,7 +182,7 @@ export function StandupGenerator({
           </select>
         </label>
 
-        <label className="flex items-center gap-2 text-sm text-[var(--fog)]">
+        <label className="flex items-center gap-2 text-sm text-[var(--ink)]">
           <input
             type="checkbox"
             checked={highlightMode}
@@ -191,22 +191,22 @@ export function StandupGenerator({
           Highlight merged PRs & impact (still truthful)
         </label>
 
-        <p className="text-xs text-[var(--mist)]">
+        <p className="text-xs text-[var(--muted)]">
           {range.label}: {rangedEvents.length} events
         </p>
 
         <button
           type="button"
-          className="btn-primary anim-glow w-full"
+          className="btn-primary w-full"
           onClick={onGenerate}
           disabled={busy}
         >
           {busy ? "Generating…" : "Generate standup"}
         </button>
-        {status && <p className="text-xs text-[var(--mist)]">{status}</p>}
+        {status && <p className="text-xs text-[var(--muted)]">{status}</p>}
       </aside>
 
-      <section className="panel rounded-2xl p-5">
+      <section className="panel rounded-[12px] p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h3 className="font-display text-xl font-semibold">Editor</h3>
           <button
@@ -232,7 +232,7 @@ export function StandupGenerator({
                 href={link.url}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-xl border border-[var(--line)] px-3 py-2 text-sm text-[var(--signal)] hover:border-[var(--signal)]"
+                className="rounded-xl border border-[var(--line)] px-3 py-2 text-sm text-[var(--pale-blue-ink)] hover:border-[var(--pale-blue-ink)]"
               >
                 {link.label}
               </a>

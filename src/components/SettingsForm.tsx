@@ -76,15 +76,15 @@ export function SettingsForm() {
   return (
     <div className="space-y-6">
       {status && (
-        <p className="rounded-xl border border-[var(--line)] bg-black/20 px-4 py-3 text-sm text-[var(--mist)]">
+        <p className="rounded-xl border border-[var(--line)] bg-[#f9f9f8] px-4 py-3 text-sm text-[var(--muted)]">
           {status}
         </p>
       )}
 
-      <section className="panel rounded-2xl p-5">
+      <section className="panel rounded-[12px] p-5">
         <h2 className="font-display text-xl font-semibold">Internship dates</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <label className="text-sm text-[var(--mist)]">
+          <label className="text-sm text-[var(--muted)]">
             Start
             <input
               type="date"
@@ -93,7 +93,7 @@ export function SettingsForm() {
               onChange={(e) => setStartDate(e.target.value)}
             />
           </label>
-          <label className="text-sm text-[var(--mist)]">
+          <label className="text-sm text-[var(--muted)]">
             End (optional)
             <input
               type="date"
@@ -105,13 +105,13 @@ export function SettingsForm() {
         </div>
       </section>
 
-      <section className="panel rounded-2xl p-5">
+      <section className="panel rounded-[12px] p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-display text-xl font-semibold">Repos</h2>
-            <p className="text-sm text-[var(--mist)]">
+            <p className="text-sm text-[var(--muted)]">
               {apiReady
-                ? "Toggle which repos ShipLog should include."
+                ? "Toggle which repos Clutch should include."
                 : "Waiting on GET /api/repos (after GitHub login)"}
             </p>
           </div>
@@ -125,13 +125,13 @@ export function SettingsForm() {
           </button>
         </div>
         {lastSyncedAt && (
-          <p className="mt-2 font-mono text-xs text-[var(--signal)]">
+          <p className="mt-2 font-mono text-xs text-[var(--pale-blue-ink)]">
             Last synced {new Date(lastSyncedAt).toLocaleString()}
           </p>
         )}
         <ul className="mt-4 divide-y divide-[var(--line)] rounded-xl border border-[var(--line)]">
           {repos.length === 0 && (
-            <li className="px-4 py-3 text-sm text-[var(--mist)]">
+            <li className="px-4 py-3 text-sm text-[var(--muted)]">
               No repos loaded.
             </li>
           )}
@@ -144,7 +144,7 @@ export function SettingsForm() {
               />
               <div>
                 <p className="font-medium">{repo.fullName}</p>
-                <p className="font-mono text-xs text-[var(--mist)]">
+                <p className="font-mono text-xs text-[var(--muted)]">
                   {repo.private ? "private" : "public"}
                 </p>
               </div>

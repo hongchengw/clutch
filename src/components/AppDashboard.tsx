@@ -40,7 +40,7 @@ export function AppDashboard() {
 
   if (loading || !events) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-16 text-sm text-[var(--mist)]">
+      <div className="mx-auto max-w-6xl px-4 py-16 text-sm text-[var(--muted)]">
         Loading dashboard…
       </div>
     );
@@ -49,7 +49,7 @@ export function AppDashboard() {
   return (
     <>
       {source === "fallback" && (
-        <div className="border-b border-[var(--line)] bg-[rgba(46,230,166,0.08)] px-4 py-2 text-center text-sm text-[var(--mist)]">
+        <div className="border-b border-[var(--line)] bg-[var(--pale-blue)] px-4 py-2 text-center text-sm text-[var(--pale-blue-ink)]">
           Live activity API not available yet — showing seed data. Auto-switches
           when authenticated sync data is present.
         </div>

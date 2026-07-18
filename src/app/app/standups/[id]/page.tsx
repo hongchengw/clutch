@@ -11,7 +11,7 @@ export default function StandupDetailPage() {
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    const draft = window.localStorage.getItem("shiplog-standup-draft");
+    const draft = window.localStorage.getItem("clutch-standup-draft");
     if (draft) {
       try {
         const parsed = JSON.parse(draft) as { contentMd?: string };
@@ -33,7 +33,7 @@ export default function StandupDetailPage() {
       setStatus("Saved to API.");
     } else {
       window.localStorage.setItem(
-        "shiplog-standup-draft",
+        "clutch-standup-draft",
         JSON.stringify({ contentMd }),
       );
       setStatus("API not ready — saved draft locally.");
@@ -47,7 +47,7 @@ export default function StandupDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <p className="font-mono text-xs uppercase tracking-[0.16em] text-[var(--mist)]">
+      <p className="font-mono text-xs uppercase tracking-[0.16em] text-[var(--muted)]">
         Standup {id}
       </p>
       <h1 className="mt-2 font-display text-3xl font-bold">Edit standup</h1>
@@ -64,7 +64,7 @@ export default function StandupDetailPage() {
           Copy Markdown
         </button>
       </div>
-      {status && <p className="mt-3 text-sm text-[var(--mist)]">{status}</p>}
+      {status && <p className="mt-3 text-sm text-[var(--muted)]">{status}</p>}
     </div>
   );
 }

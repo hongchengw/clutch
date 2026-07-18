@@ -36,7 +36,7 @@ export default function StandupsPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <h1 className="font-display text-3xl font-bold">Standups</h1>
-      <p className="mt-2 text-sm text-[var(--mist)]">
+      <p className="mt-2 text-sm text-[var(--muted)]">
         Generate for yesterday or full internship. Edits always win over AI.
         {demo
           ? " Using local template generation until authenticated APIs return data."
