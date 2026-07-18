@@ -1,4 +1,4 @@
-# ShipLog
+# Clutch
 
 *Your commits already tell the story. We write the review.*
 
@@ -69,3 +69,12 @@ The git history is test-first: each `test(aN): …` commit lands failing specs, 
 ## Demo mode
 
 Planned as Person B's task B2 (`/demo`, seeded data, no OAuth) — not yet implemented.
+
+## Person B UI routes
+
+- `/` — landing (hackathon pitch)
+- `/demo` — offline demo dashboard + standup generator (no OAuth)
+- `/app` — authenticated shell (falls back to seed data if APIs unavailable)
+- `/app/standups`, `/app/settings`, `/login`
+
+Shared contracts: `src/lib/types.ts` (Person A API DTOs).

@@ -26,7 +26,15 @@ export async function GET() {
     }),
   ]);
 
-  const byId = new Map(selections.map((s) => [s.githubRepoId, s]));
+  // Explicit type: Prisma client may not be fully generated in offline envs.
+  type SelectionRow = {
+    githubRepoId: string;
+    included: boolean;
+    lastSyncedAt: Date | null;
+  };
+  const byId = new Map<string, SelectionRow>(
+    (selections as SelectionRow[]).map((s) => [s.githubRepoId, s]),
+  );
   const repos: RepoDTO[] = ghRepos.map((r) => {
     const sel = byId.get(r.githubRepoId);
     return {
